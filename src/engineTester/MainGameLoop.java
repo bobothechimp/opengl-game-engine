@@ -55,6 +55,7 @@ public class MainGameLoop {
 		TextMaster.init(loader);
 		MasterRenderer renderer = new MasterRenderer(loader);
 		ParticleMaster.init(loader, renderer.getProjectionMatrix());
+		Random random = new Random();
 		
 		// =================TEXTS==================
 		
@@ -66,24 +67,9 @@ public class MainGameLoop {
 		fpsCount.setColour(0f, 1f, 0f);
 		fpsCount.setOutlineColor(0f, 0.3f, 0f);
 		
-		// =================LIGHTS==================
-		
-		List<Light> lights = new ArrayList<Light>();
-		Light sun = new Light(new Vector3f(1200, 800, 800), new Vector3f(1f, 1f, 1f));
-		lights.add(sun);
-		Light lampLight1 = new Light(new Vector3f(185, 10, -293), new Vector3f(2, 2, 0), new Vector3f(1, 0.01f, 0.002f));
-		Light lampLight2 = new Light(new Vector3f(370, 17, -300), new Vector3f(1, 1, 1), new Vector3f(1, 0.01f, 0.002f));
-		lights.add(lampLight1);
-		lights.add(lampLight2);
-//		float h = 0;
-//		Vector3f funkyColor = Maths.HSVtoRGB(new Vector3f(h, 1f, 1f));
-//		Light funkyLight = new Light(new Vector3f(-200, 10, -200), funkyColor);
-//		lights.add(funkyLight);
-//		lights.add(funkyLight1);
-//		lights.add(funkyLight2);
-		
 		// ==================TERRAIN==================
 		
+		final float SEA_LEVEL = 0f;
 		TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("terrain/grassy2"));
 		TerrainTexture rTexture = new TerrainTexture(loader.loadTexture("terrain/mud"));
 		TerrainTexture gTexture = new TerrainTexture(loader.loadTexture("terrain/grassFlowers"));
@@ -94,11 +80,51 @@ public class MainGameLoop {
 		TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("water/dudv_map"));
 		
 		Terrain terrain1 = new Terrain(0, -1, loader, texturePack, blendMap, "heightMaps/heightmap");
-		Terrain terrain2 = new Terrain(1, -1, loader, texturePack, blendMap, "heightMaps/pondHeightMap");
-		Terrain[][] terrainGrid = new Terrain[][] {{terrain1}, {terrain2}};
+//		Terrain terrain2 = new Terrain(1, -1, loader, texturePack, blendMap, "heightMaps/pondHeightMap");
+		Terrain[][] terrainGrid = new Terrain[][] {{terrain1}}; //, {terrain2}};
 		List<Terrain> terrains = new ArrayList<Terrain>();
 		terrains.add(terrain1);
-		terrains.add(terrain2);
+//		terrains.add(terrain2);
+		
+		// =================LIGHTS==================
+		
+		List<Light> lights = new ArrayList<Light>();
+		Light sun = new Light(new Vector3f(1200, 800, 800), new Vector3f(1f, 1f, 1f));
+		lights.add(sun);
+		float lampX = 0f;
+		float lampY = SEA_LEVEL;
+		float lampZ = 0f;
+		while(lampY < SEA_LEVEL + 1) {
+			lampX = random.nextFloat() * 800f;
+			lampZ = random.nextFloat() * -800f;
+			lampY = terrain1.getHeightOfTerrain(lampX, lampZ);
+		}
+		Light lampLight1 = new Light(
+				new Vector3f(lampX, lampY + 15f, lampZ),
+				new Vector3f(2, 2, 0),
+				new Vector3f(1, 0.01f, 0.002f)
+		);
+		lampX = 0f;
+		lampY = SEA_LEVEL;
+		lampZ = 0f;
+		while(lampY < SEA_LEVEL + 1) {
+			lampX = random.nextFloat() * 800f;
+			lampZ = random.nextFloat() * -800f;
+			lampY = terrain1.getHeightOfTerrain(lampX, lampZ);
+		}
+		Light lampLight2 = new Light(
+				new Vector3f(lampX, lampY + 15f, lampZ),
+				new Vector3f(1, 1, 1),
+				new Vector3f(1, 0.01f, 0.002f)
+		);
+		lights.add(lampLight1);
+		lights.add(lampLight2);
+//		float h = 0;
+//		Vector3f funkyColor = Maths.HSVtoRGB(new Vector3f(h, 1f, 1f));
+//		Light funkyLight = new Light(new Vector3f(-200, 10, -200), funkyColor);
+//		lights.add(funkyLight);
+//		lights.add(funkyLight1);
+//		lights.add(funkyLight2);
 		
 		// ==================BASIC MODELS==================
 		
@@ -122,8 +148,14 @@ public class MainGameLoop {
 //		lampTexture.setShineDamper(1);
 //		lampTexture.setReflectivity(2);
 		TexturedModel lamp = new TexturedModel(lampModel, lampTexture);
-		Entity lamp1 = new Entity(lamp, new Vector3f(185, -4.7f, -293), 0, 0, 0, 1);
-		Entity lamp2 = new Entity(lamp, new Vector3f(370, 4.2f, -300), 0, 0, 0, 1);
+		Entity lamp1 = new Entity(
+				lamp,
+				new Vector3f(lampLight1.getPosition().x, lampLight1.getPosition().y - 15f, lampLight1.getPosition().z),
+				0, 0, 0, 1);
+		Entity lamp2 = new Entity(
+				lamp,
+				new Vector3f(lampLight2.getPosition().x, lampLight2.getPosition().y - 15f, lampLight2.getPosition().z),
+				0, 0, 0, 1);
 		entities.add(lamp1);
 		entities.add(lamp2);
 		
@@ -161,7 +193,7 @@ public class MainGameLoop {
 		ModelData ffData = OBJFileLoader.loadOBJ("fireflower/mario_flower");
 		RawModel ffModel = loader.loadToVAO(ffData.getVertices(), ffData.getTextureCoords(),
 				ffData.getNormals(), ffData.getIndices());
-		ModelTexture ffTexture = new ModelTexture(loader.loadTexture("fireflower/fireflower"));
+		ModelTexture ffTexture = new ModelTexture(loader.loadTexture("colors/white"));
 		TexturedModel ffTM = new TexturedModel(ffModel, ffTexture);
 		
 		//grass
@@ -208,28 +240,33 @@ public class MainGameLoop {
 		
 		//generating random assortment of plants
 		List<Entity> allPlants = new ArrayList<Entity>();
-		Random random = new Random();
 		
 		for(int i = 0; i < 500; i++) {
-			float x = random.nextFloat() * 800 - 40;
-			float z = random.nextFloat() * -600;
+			float x = random.nextFloat() * 800;
+			float z = random.nextFloat() * -800;
 			float y = terrain1.getHeightOfTerrain(x, z);
-			allPlants.add(new Entity(treeTM, new Vector3f(x, y, z), 0, 0, 0, 3));
+			if(y > SEA_LEVEL + 1) {
+				allPlants.add(new Entity(treeTM, new Vector3f(x, y, z), 0, 0, 0, 3));
+			}
 			
-			x = random.nextFloat() * 800 - 40;
-			z = random.nextFloat() * -600;
+//			x = random.nextFloat() * 800 - 40;
+//			z = random.nextFloat() * -600;
+//			y = terrain1.getHeightOfTerrain(x, z);
+//			allPlants.add(new Entity(grass, new Vector3f(x, y, z), 0, 0, 0, 1));
+			
+			x = random.nextFloat() * 800;
+			z = random.nextFloat() * -800;
 			y = terrain1.getHeightOfTerrain(x, z);
-			allPlants.add(new Entity(grass, new Vector3f(x, y, z), 0, 0, 0, 1));
+			if(y > SEA_LEVEL + 1) {
+				allPlants.add(new Entity(fern, random.nextInt(4), new Vector3f(x, y, z), 0, 0, 0, 0.6f));
+			}
 			
-			x = random.nextFloat() * 800 - 40;
-			z = random.nextFloat() * -600;
-			y = terrain1.getHeightOfTerrain(x, z);
-			allPlants.add(new Entity(fern, random.nextInt(4), new Vector3f(x, y, z), 0, 0, 0, 0.6f));
-			
-			x = random.nextFloat() * 800 - 40;
-			z = random.nextFloat() * -600;
+			x = random.nextFloat() * 800;
+			z = random.nextFloat() * -800;
 			y = 3 + terrain1.getHeightOfTerrain(x, z);
-			allPlants.add(new Entity(ffTM, random.nextInt(4), new Vector3f(x, y, z), 0, 0, 0, 1f));
+			if(y > SEA_LEVEL + 1) {
+				allPlants.add(new Entity(ffTM, random.nextInt(4), new Vector3f(x, y, z), 0, random.nextFloat() * 360f, 0, 1f));
+			}
 		}
 		entities.addAll(allPlants);
 		
@@ -255,7 +292,14 @@ public class MainGameLoop {
 		WaterShader waterShader = new WaterShader();
 		WaterRenderer waterRenderer = new WaterRenderer(loader, waterShader, renderer.getProjectionMatrix(), fbos);
 		List<WaterTile> waters = new ArrayList<WaterTile>();
-		waters.add(new WaterTile(150, -60, 3));
+		float terrainSize = 800f;
+		float waterTileSize = 80f;
+		float tilesPerTerrain = terrainSize / waterTileSize;
+		for(int gx = 0; gx < tilesPerTerrain; gx++) {
+			for(int gz = 0; gz < tilesPerTerrain; gz++) {
+				waters.add(new WaterTile(40 + gx * waterTileSize, -40 - gz * waterTileSize, SEA_LEVEL));
+			}
+		}
 		
 		// ==================PARTICLES==================
 		
@@ -272,7 +316,7 @@ public class MainGameLoop {
 			player.move(terrainGrid);
 			camera.move();
 			picker.update();		
-			particleSystem.generateParticles(player.getPosition());
+			particleSystem.generateParticles(lampLight1.getPosition());
 			ParticleMaster.update(camera);
 			
 			barrel.increaseRotation(0, 0.2f, 0);

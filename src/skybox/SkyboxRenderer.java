@@ -98,8 +98,8 @@ public class SkyboxRenderer {
 	
 	private void bindTextures() {
 		time += TIME_SPEED * DisplayManager.getFrameTimeSeconds() * 1000;
-		time %= Math.PI * 10000;
-		dayBlendFactor = (float) Math.pow(Math.cos(time / 10000), 2);
+		time %= Math.PI * 50000;
+		dayBlendFactor = (float) Math.pow(Math.cos(time / 50000), 2);
 		
 		/* Use for printing out current time and blend factor
 		int timeInSeconds = (int) (time * (86400 / (Math.PI * 10000)));

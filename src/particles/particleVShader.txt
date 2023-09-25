@@ -9,6 +9,7 @@ in float blendFactor;
 out vec2 textureCoords1;
 out vec2 textureCoords2;
 out float blend;
+out float visibility;
 
 uniform mat4 projectionMatrix;
 uniform float numberOfRows;

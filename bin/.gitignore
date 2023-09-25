@@ -2,3 +2,8 @@
 /renderEngine/
 /engineTester/
 /fontMeshCreator/
+/terrains/
+/water/
+/normalMappingRenderer/
+/shaders/
+/skybox/
