@@ -62,6 +62,9 @@ public class MainGameLoop {
 		GUIText text = new GUIText("I am a man of fortune, and I must seek my fortune", 3f, 0.5f, 0.1f, 0.7f, 0.1f, candara, new Vector2f(0.0f, 0.0f), 1f, true);
 		text.setColour(1f, 1f, 1f);
 		text.setOutlineColor(0f, 0f, 0f);
+		GUIText fpsCount = new GUIText("144", 2f, 0.5f, 0.01f, 0.7f, 0.01f, candara, new Vector2f(0.02f, 0.9f), 1f, false);
+		fpsCount.setColour(0f, 1f, 0f);
+		fpsCount.setOutlineColor(0f, 0.3f, 0f);
 		
 		// =================LIGHTS==================
 		
@@ -256,12 +259,16 @@ public class MainGameLoop {
 		
 		// ==================PARTICLES==================
 		
-		ParticleTexture particleTexture = new ParticleTexture(loader.loadTexture("particles/fire"), 8, true);
-		ParticleSystem particleSystem = new ParticleSystem(particleTexture, 40, 10, 5, 180, 5, 2, 0.1f, 1);
+		ParticleTexture particleTexture = new ParticleTexture(loader.loadTexture("particles/particleAtlas"), 4, true);
+		ParticleSystem particleSystem = new ParticleSystem(particleTexture, 80, 20, 10, 180, 3, 1, 0.1f, 1);
 		
 		// ==================MAIN GAME LOOP==================
 		
+		float timeElapsed = 0.0f;
+		int framesElapsed = 0;
 		while(!Display.isCloseRequested()) {
+			timeElapsed += DisplayManager.getFrameTimeSeconds();
+			framesElapsed++;
 			player.move(terrainGrid);
 			camera.move();
 			picker.update();		
@@ -300,6 +307,13 @@ public class MainGameLoop {
 			float offsetX = (Mouse.getX() / 2560f * 2.0f - 1.0f) * 0.006f;
 			float offsetY = ((1.0f - Mouse.getY() / 1440f) * 2.0f - 1.0f) * 0.006f;
 			text.setOffset(offsetX, offsetY);
+			if(timeElapsed >= 1.0f) {
+				float fps = framesElapsed / timeElapsed;
+				fps = Math.round(fps * 100f) / 100f;
+				fpsCount.setTextString("" + fps);
+				timeElapsed -= 1f;
+				framesElapsed = 0;
+			}
 			
 			//render main scene
 			GL11.glDisable(GL30.GL_CLIP_DISTANCE0);

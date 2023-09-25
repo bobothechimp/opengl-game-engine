@@ -288,6 +288,17 @@ public class GUIText {
 	public int getVertexCount() {
 		return this.vertexCount;
 	}
+	
+	/**
+	 * Sets the text of this GUI
+	 * 
+	 * @param text
+	 */
+	public void setTextString(String text) {
+		this.textString = text;
+		TextMaster.removeText(this);
+		TextMaster.loadText(this);
+	}
 
 	/**
 	 * @return the font size of the text (a font size of 1 is normal).
