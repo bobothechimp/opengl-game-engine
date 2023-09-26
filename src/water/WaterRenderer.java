@@ -43,8 +43,8 @@ public class WaterRenderer {
 		setUpVAO(loader);
 	}
 
-	public void render(List<WaterTile> waters, Camera camera, Light sun) {
-		prepareRender(camera, sun);
+	public void render(List<WaterTile> waters, Camera camera, Light sun, int graphicsLevel) {
+		prepareRender(camera, sun, graphicsLevel);
 		for (WaterTile water : waters) {
 			shader.loadModelMatrix(water.getTransformationMatrix());
 			GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, quad.getVertexCount());
@@ -52,7 +52,7 @@ public class WaterRenderer {
 		unbind();
 	}
 	
-	private void prepareRender(Camera camera, Light sun){
+	private void prepareRender(Camera camera, Light sun, int graphicsLevel){
 		shader.start();
 		shader.loadViewMatrix(camera);
 		moveFactor += WAVE_SPEED * DisplayManager.getFrameTimeSeconds();
@@ -60,6 +60,7 @@ public class WaterRenderer {
 		shader.loadMoveFactor(moveFactor);
 		shader.loadLight(sun);
 		shader.loadSkyColor(MasterRenderer.RED, MasterRenderer.GREEN, MasterRenderer.BLUE);
+		shader.loadGraphicsLevel(graphicsLevel);
 		GL30.glBindVertexArray(quad.getVaoID());
 		GL20.glEnableVertexAttribArray(0);
 		GL13.glActiveTexture(GL13.GL_TEXTURE0);

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -60,10 +61,11 @@ public class MainGameLoop {
 		// =================TEXTS==================
 		
 		FontType candara = new FontType(loader.loadFontTexture("fonts/candara"), new File("res/fonts/candara.fnt"));
-		GUIText text = new GUIText("I am a man of fortune, and I must seek my fortune", 3f, 0.5f, 0.1f, 0.7f, 0.1f, candara, new Vector2f(0.0f, 0.0f), 1f, true);
+		FontType ocra = new FontType(loader.loadFontTexture("fonts/ocra"), new File("res/fonts/ocra.fnt"));
+		GUIText text = new GUIText("I am a man of fortune, and I must seek my fortune", 3f, 0.5f, 0.1f, 0.7f, 0.1f, candara, new Vector2f(0.0f, 0.1f), 1f, true);
 		text.setColour(1f, 1f, 1f);
 		text.setOutlineColor(0f, 0f, 0f);
-		GUIText fpsCount = new GUIText("144", 2f, 0.5f, 0.01f, 0.7f, 0.01f, candara, new Vector2f(0.02f, 0.9f), 1f, false);
+		GUIText fpsCount = new GUIText("144", 2f, 0.5f, 0.1f, 0.7f, 0.1f, ocra, new Vector2f(0.02f, 0.9f), 1f, false);
 		fpsCount.setColour(0f, 1f, 0f);
 		fpsCount.setOutlineColor(0f, 0.3f, 0f);
 		
@@ -278,10 +280,12 @@ public class MainGameLoop {
 		// ==================GUIS==================
 		
 		List<GuiTexture> guis = new ArrayList<GuiTexture>();
-		GuiTexture thinmatrixGui = new GuiTexture(loader.loadTexture("guis/thinmatrix"), new Vector2f(-0.8f, 0.9f), new Vector2f(0.2f, 0.2f));
-		GuiTexture minecraftGui = new GuiTexture(loader.loadTexture("guis/minecraft"), new Vector2f(0f, -0.85f), new Vector2f(0.5f, 0.75f));
+		GuiTexture thinmatrixGui = new GuiTexture(loader.loadTexture("guis/thinmatrix"), new Vector2f(-0.82f, 0.9f), new Vector2f(0.15f, 0.15f), true);
+//		GuiTexture minecraftGui = new GuiTexture(loader.loadTexture("guis/minecraft"), new Vector2f(0f, -0.85f), new Vector2f(0.5f, 0.75f), true);
+//		GuiTexture settingsGui = new GuiTexture(loader.loadTexture("guis/settings"), new Vector2f(0f, -0.6f), new Vector2f(0.4f, 0.5f), false);
 		guis.add(thinmatrixGui);
-		guis.add(minecraftGui);
+//		guis.add(minecraftGui);
+//		guis.add(settingsGui);
 		
 		GuiRenderer guiRenderer = new GuiRenderer(loader);
 		MousePicker picker = new MousePicker(camera, renderer.getProjectionMatrix(), terrainGrid);
@@ -310,15 +314,18 @@ public class MainGameLoop {
 		
 		float timeElapsed = 0.0f;
 		int framesElapsed = 0;
+		int graphicsLevel = 6;
 		while(!Display.isCloseRequested()) {
 			timeElapsed += DisplayManager.getFrameTimeSeconds();
 			framesElapsed++;
+			
 			player.move(terrainGrid);
 			camera.move();
 			picker.update();		
 			particleSystem.generateParticles(lampLight1.getPosition());
 			ParticleMaster.update(camera);
 			
+			//spin barrel
 			barrel.increaseRotation(0, 0.2f, 0);
 			
 			GL11.glEnable(GL30.GL_CLIP_DISTANCE0);
@@ -348,9 +355,12 @@ public class MainGameLoop {
 			float sunlight = 1f * (1 - SkyboxRenderer.getDayBlendFactor());
 			sun.setColor(new Vector3f(sunlight, sunlight, sunlight));
 			
+			//create dynamic outline effect for upper text
 			float offsetX = (Mouse.getX() / 2560f * 2.0f - 1.0f) * 0.006f;
 			float offsetY = ((1.0f - Mouse.getY() / 1440f) * 2.0f - 1.0f) * 0.006f;
 			text.setOffset(offsetX, offsetY);
+			
+			// update fps counter
 			if(timeElapsed >= 1.0f) {
 				float fps = framesElapsed / timeElapsed;
 				fps = Math.round(fps * 100f) / 100f;
@@ -359,11 +369,18 @@ public class MainGameLoop {
 				framesElapsed = 0;
 			}
 			
+			if(Keyboard.isKeyDown(Keyboard.KEY_1)) graphicsLevel = 1;
+			if(Keyboard.isKeyDown(Keyboard.KEY_2)) graphicsLevel = 2;
+			if(Keyboard.isKeyDown(Keyboard.KEY_3)) graphicsLevel = 3;
+			if(Keyboard.isKeyDown(Keyboard.KEY_4)) graphicsLevel = 4;
+			if(Keyboard.isKeyDown(Keyboard.KEY_5)) graphicsLevel = 5;
+			if(Keyboard.isKeyDown(Keyboard.KEY_6)) graphicsLevel = 6;
+			
 			//render main scene
 			GL11.glDisable(GL30.GL_CLIP_DISTANCE0);
 			fbos.unbindCurrentFrameBuffer();
 			renderer.renderScene(entities, normalMapEntities, terrains, lights, camera, new Vector4f(0, -1, 0, Integer.MAX_VALUE));
-			waterRenderer.render(waters, camera, sun);
+			waterRenderer.render(waters, camera, sun, graphicsLevel);
 			
 			ParticleMaster.renderParticles(camera);
 			

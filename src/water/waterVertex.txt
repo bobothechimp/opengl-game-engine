@@ -13,6 +13,7 @@ uniform mat4 viewMatrix;
 uniform mat4 modelMatrix;
 uniform vec3 cameraPosition;
 uniform vec3 lightPosition;
+uniform int graphicsLevel;
 
 const float tiling = 4.0;
 

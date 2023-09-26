@@ -26,6 +26,8 @@ public class WaterShader extends ShaderProgram {
 	private int location_lightPosition;
 	private int location_depthMap;
 	private int location_skyColor;
+	
+	private int location_graphicsLevel;
 
 	public WaterShader() {
 		super(VERTEX_FILE, FRAGMENT_FILE);
@@ -51,6 +53,7 @@ public class WaterShader extends ShaderProgram {
 		location_lightPosition = getUniformLocation("lightPosition");
 		location_depthMap = getUniformLocation("depthMap");
 		location_skyColor = getUniformLocation("skyColor");
+		location_graphicsLevel = getUniformLocation("graphicsLevel");
 	}
 	
 	public void connectTextureUnits() {
@@ -86,6 +89,10 @@ public class WaterShader extends ShaderProgram {
 
 	public void loadModelMatrix(Matrix4f modelMatrix){
 		loadMatrix(location_modelMatrix, modelMatrix);
+	}
+	
+	public void loadGraphicsLevel(int level) {
+		super.loadInt(location_graphicsLevel, level);
 	}
 
 }
