@@ -18,6 +18,7 @@ import entities.Camera;
 import entities.Entity;
 import entities.Light;
 import entities.Player;
+import entities.Vehicle;
 import fontMeshCreator.FontType;
 import fontMeshCreator.GUIText;
 import fontRendering.TextMaster;
@@ -132,6 +133,25 @@ public class MainGameLoop {
 		
 		List<Entity> entities = new ArrayList<Entity>();
 		List<Entity> normalMapEntities = new ArrayList<Entity>();
+		
+//		TexturedModel carModel = new TexturedModel(NormalMappedObjLoader.loadOBJ("cars/De_Tomaso_P72_2020", loader),
+//				new ModelTexture(loader.loadTexture("cars/Detomasop72_Base_Color")));
+//		carModel.getTexture().setNormalMap(loader.loadTexture("cars/Detomasop72_Normal_OpenGL"));
+//		carModel.getTexture().setShineDamper(10);
+//		carModel.getTexture().setReflectivity(0.5f);
+//		Entity car = new Entity(carModel, new Vector3f(75, 20, -75), 0, 0, 0, 2f);
+//		normalMapEntities.add(car);
+		
+		TexturedModel boulderModel = new TexturedModel(NormalMappedObjLoader.loadOBJ("boulder/boulder", loader),
+		new ModelTexture(loader.loadTexture("boulder/boulder")));
+		boulderModel.getTexture().setNormalMap(loader.loadTexture("boulder/boulderNormal"));
+		boulderModel.getTexture().setShineDamper(10);
+		boulderModel.getTexture().setReflectivity(0.5f);
+//		Entity boulder = new Entity(boulderModel, new Vector3f(100, 10, -100), 0, 0, 0, 1f);
+//		normalMapEntities.add(boulder);
+		
+		Vehicle boulderCar = new Vehicle(boulderModel, new Vector3f(100, 10, -100), 0, 0, 0, 1f);
+		normalMapEntities.add(boulderCar);
 		
 		TexturedModel barrelModel = new TexturedModel(NormalMappedObjLoader.loadOBJ("barrel/barrel", loader),
 				new ModelTexture(loader.loadTexture("barrel/barrel")));
@@ -320,6 +340,7 @@ public class MainGameLoop {
 			framesElapsed++;
 			
 			player.move(terrainGrid);
+			boulderCar.move(terrainGrid);
 			camera.move();
 			picker.update();		
 			particleSystem.generateParticles(lampLight1.getPosition());

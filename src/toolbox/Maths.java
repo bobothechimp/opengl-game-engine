@@ -74,4 +74,12 @@ public class Maths {
 	public static float NormalDistribution(float mean, float var) {
 		return (float) (RANDOM.nextGaussian() * Math.sqrt(var) + mean);
 	}
+	
+	public static float distance3d(Vector3f p1, Vector3f p2) {
+		float dx = p1.x - p2.x;
+		float dy = p1.y - p2.y;
+		float dz = p1.z - p2.z;
+		return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+				
+	}
 }

@@ -36,20 +36,19 @@ public class NormalMappedObjLoader {
 			while (true) {
 				line = reader.readLine();
 				if (line.startsWith("v ")) {
-					String[] currentLine = line.split(" ");
+					String[] currentLine = line.split("\\s+");
 					Vector3f vertex = new Vector3f((float) Float.valueOf(currentLine[1]),
 							(float) Float.valueOf(currentLine[2]),
 							(float) Float.valueOf(currentLine[3]));
 					VertexNM newVertex = new VertexNM(vertices.size(), vertex);
 					vertices.add(newVertex);
-
 				} else if (line.startsWith("vt ")) {
-					String[] currentLine = line.split(" ");
+					String[] currentLine = line.split("\\s+");
 					Vector2f texture = new Vector2f((float) Float.valueOf(currentLine[1]),
 							(float) Float.valueOf(currentLine[2]));
 					textures.add(texture);
 				} else if (line.startsWith("vn ")) {
-					String[] currentLine = line.split(" ");
+					String[] currentLine = line.split("\\s+");
 					Vector3f normal = new Vector3f((float) Float.valueOf(currentLine[1]),
 							(float) Float.valueOf(currentLine[2]),
 							(float) Float.valueOf(currentLine[3]));
@@ -59,7 +58,7 @@ public class NormalMappedObjLoader {
 				}
 			}
 			while (line != null && line.startsWith("f ")) {
-				String[] currentLine = line.split(" ");
+				String[] currentLine = line.split("\\s+");
 				String[] vertex1 = currentLine[1].split("/");
 				String[] vertex2 = currentLine[2].split("/");
 				String[] vertex3 = currentLine[3].split("/");

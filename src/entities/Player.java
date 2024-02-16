@@ -20,6 +20,9 @@ public class Player extends Entity {
 	private float upwardsSpeed = 0;
 	
 	private boolean isInAir = false;
+	private boolean fPressed = false;
+	
+	private Vehicle car = null;
 	
 	public Player(TexturedModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale) {
 		super(model, position, rotX, rotY, rotZ, scale);
@@ -33,8 +36,10 @@ public class Player extends Entity {
 		float dx = (float) (distance * Math.sin(Math.toRadians(super.getRotY())));
 		float dz = (float) (distance * Math.cos(Math.toRadians(super.getRotY())));
 		
-		upwardsSpeed += GRAVITY * DisplayManager.getFrameTimeSeconds();
-		super.increasePosition(dx, upwardsSpeed * DisplayManager.getFrameTimeSeconds(), dz);
+		if(car == null) {
+			upwardsSpeed += GRAVITY * DisplayManager.getFrameTimeSeconds();
+			super.increasePosition(dx, upwardsSpeed * DisplayManager.getFrameTimeSeconds(), dz);
+		}
 		Terrain currentTerrain = Terrain.getTerrain(terrains, super.getPosition().x, super.getPosition().z);
 		float terrainHeight;
 		if(currentTerrain == null) {
@@ -56,26 +61,55 @@ public class Player extends Entity {
 		}
 	}
 	
+	private void enterVehicle(Vehicle vehicle) {
+		car = vehicle;
+		car.setDriver(this);
+	}
+	
+	private void exitVehicle() {
+		Vector3f.add(car.getPosition(), car.getDropOffDisplacement(), super.getPosition());
+		car.setDriver(null);
+		car = null;
+	}
+	
 	private void checkInputs() {
-		if(Keyboard.isKeyDown(Keyboard.KEY_W)) {
-			this.currentSpeed = Math.min(MAX_RUN_SPEED, this.currentSpeed + RUN_ACCEL);
-		} else if(Keyboard.isKeyDown(Keyboard.KEY_S)) {
-			this.currentSpeed = Math.max(-MAX_RUN_SPEED, this.currentSpeed - RUN_ACCEL);
-		} else if(!isInAir){
-			this.currentSpeed *= 0.99;
-			if(this.currentSpeed <= 0.1 && this.currentSpeed >= -0.1) this.currentSpeed = 0;
+		if(!fPressed && Keyboard.isKeyDown(Keyboard.KEY_F)) {
+			if(car == null) {
+				enterVehicle(Vehicle.closestVehicle(this));
+			} else {
+				exitVehicle();
+			}
+			fPressed = true;
+		} else if(!Keyboard.isKeyDown(Keyboard.KEY_F)) {
+			fPressed = false;
 		}
-		
-		if(Keyboard.isKeyDown(Keyboard.KEY_A)) {
-			this.currentTurnSpeed = TURN_SPEED;
-		} else if(Keyboard.isKeyDown(Keyboard.KEY_D)) {
-			this.currentTurnSpeed = -TURN_SPEED;
+		if(car == null) {
+			
+			if(Keyboard.isKeyDown(Keyboard.KEY_W)) {
+				this.currentSpeed = Math.min(MAX_RUN_SPEED, this.currentSpeed + RUN_ACCEL);
+			} else if(Keyboard.isKeyDown(Keyboard.KEY_S)) {
+				this.currentSpeed = Math.max(-MAX_RUN_SPEED, this.currentSpeed - RUN_ACCEL);
+			} else if(!isInAir){
+				this.currentSpeed *= 0.99;
+				if(this.currentSpeed <= 0.1 && this.currentSpeed >= -0.1) this.currentSpeed = 0;
+			}
+			
+			if(Keyboard.isKeyDown(Keyboard.KEY_A)) {
+				this.currentTurnSpeed = TURN_SPEED;
+			} else if(Keyboard.isKeyDown(Keyboard.KEY_D)) {
+				this.currentTurnSpeed = -TURN_SPEED;
+			} else {
+				this.currentTurnSpeed = 0;
+			}
+			
+			if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
+				jump();
+			}
 		} else {
-			this.currentTurnSpeed = 0;
-		}
-		
-		if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
-			jump();
+			Vector3f.add(car.getPosition(), car.getDriverDisplacement(), super.getPosition());
+			super.setRotX(car.getRotX());
+			super.setRotY(car.getRotY());
+			super.setRotZ(car.getRotZ());
 		}
 	}
 	
